@@ -1,0 +1,37 @@
+{
+  "chain": {
+    "id": "8453",
+    "name": "Base",
+    "explorer": "https://basescan.org"
+  },
+  "wallet": {
+    "recipient": "0x0000000000000000000000000000000000000000",
+    "note": "Endereço que recebe os dust sweeps do agente. Copie o endereço da sua carteira Turnkey (app.keeperhub.com -> Wallet) ou use outra carteira sua. Deixe 0x0 para enviar ao próprio agente."
+  },
+  "execution": {
+    "action": "transfer-native",
+    "amount": "0.0001",
+    "gas_limit_multiplier": "1.2",
+    "sponsored": true
+  },
+  "signals": {
+    "whale": {
+      "enabled": true,
+      "token_address": "0x...",
+      "min_value_usd": 5000,
+      "window_minutes": 10
+    },
+    "momentum": {
+      "enabled": true,
+      "coingecko_id": "pepe",
+      "min_24h_change_pct": 15.0
+    },
+    "min_score": 2
+  },
+  "safety": {
+    "max_amount_per_tx": "0.001",
+    "max_tx_per_hour": 2,
+    "require_confirm": false
+  },
+  "audit_dir": "audit"
+}

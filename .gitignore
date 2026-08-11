@@ -1,0 +1,12 @@
+# Segredos — NUNCA subir
+.env
+*.env
+.env.*
+
+# Config local (tem endereço da carteira — não é segredo, mas é seu)
+config.json
+
+# Dados de runtime
+audit/
+__pycache__/
+*.pyc
