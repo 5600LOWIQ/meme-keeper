@@ -18,6 +18,8 @@ cd 19-keeperhub-agent
 gh repo create meme-keeper --public --source . --remote origin --push
 ```
 
+> ✅ **Já feito** — repo publicado: https://github.com/5600LOWIQ/meme-keeper
+
 **Opção B (sem instalar nada):**
 1. Acesse https://github.com/new → nome do repo: `meme-keeper` → **Public** → Create.
 2. Depois, no terminal:
@@ -107,7 +109,7 @@ Opcional: OBS Studio (grátis) ou a gravação de tela do Windows (Win+G).
 
 Na página do hackathon → **Submit BUIDL**:
 
-**Link do GitHub:** `https://github.com/SEU_USUARIO/meme-keeper`
+**Link do GitHub:** `https://github.com/5600LOWIQ/meme-keeper` (já publicado ✅)
 
 **Descrição (cole isto, traduza pro inglês já está):**
 
