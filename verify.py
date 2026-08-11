@@ -46,13 +46,12 @@ def main():
         sys.exit(1)
 
     # 2) carteira Turnkey
-    try:
-        w = kh.get_wallet()
-        addr = (w or {}).get("address") or (w or {}).get("walletAddress")
+    addr = kh.get_org_wallet_address()
+    if addr:
         print(f"{OK} carteira Turnkey: {addr}")
         ok_count += 1
-    except KeeperHubError as e:
-        print(f"{WARN} carteira: {e} (hint: {e.hint}) — provisiona em app.keeperhub.com (Wallet)")
+    else:
+        print(f"{WARN} carteira não encontrada — provisiona em app.keeperhub.com (Wallet)")
         warn_count += 1
 
     # 3) workflows existentes

@@ -132,7 +132,7 @@ Na página do hackathon → **Submit BUIDL**:
 
 **Demo video:** o arquivo do PASSO 5.
 
-**Transaction link:** o link do PASSO 4.
+**Transaction link:** `https://basescan.org/tx/0xbb4eb5828086387951813db660bfa661674c56970af3d2e1a0a31806c6885553` (executada 11/08 — status `completed`, receipt `success`, **gas patrocinado pelo KeeperHub** ✅)
 
 **Tags:** AI Agents · Onchain · DeFi · Ethereum/Base
 

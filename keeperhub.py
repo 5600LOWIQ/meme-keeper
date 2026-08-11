@@ -124,8 +124,38 @@ class KeeperHub:
         return self.session.get(self.base_url + "/chains", timeout=self.timeout).json()
 
     def get_wallet(self):
-        """Info da carteira Turnkey da organização."""
+        """Info da carteira Turnkey da organização (endpoint direto)."""
         return self._request("GET", "/integrations/wallet")
+
+    def get_org_wallet_address(self):
+        """Endereço da carteira da organização, com fallbacks robustos.
+
+        Tenta, em ordem: /integrations/wallet, /integrations (tipo web3),
+        /user.walletAddress. Devolve o endereço (minúsculo) ou None.
+        """
+        try:
+            w = self.get_wallet()
+            addr = (w or {}).get("address") or (w or {}).get("walletAddress")
+            if addr:
+                return str(addr).lower()
+        except KeeperHubError:
+            pass
+        try:
+            integ = self._request("GET", "/integrations")
+            if isinstance(integ, list):
+                for it in integ:
+                    if it.get("type") == "web3" and it.get("address"):
+                        return str(it["address"]).lower()
+        except KeeperHubError:
+            pass
+        try:
+            u = self._request("GET", "/user")
+            addr = (u or {}).get("walletAddress")
+            if addr:
+                return str(addr).lower()
+        except KeeperHubError:
+            pass
+        return None
 
     def list_workflows(self):
         return self._request("GET", "/workflows")
@@ -202,19 +232,22 @@ class KeeperHub:
 
     # ---------------- fluxo seguro de primeira escrita ----------------
 
-    def preflight_then_execute(self, fn, task_id, chain_id, recipient, amount,
-                               token="", **kwargs):
+    def preflight_then_execute(self, fn, task_id, **kwargs):
         """Simula primeiro; só transmite se a simulação passar. Retorna (sim, real).
 
-        `fn` é um dos métodos de escrita (transfer, contract_call...).
-        `task_id` identifica o trabalho (ex.: 'sweep-2026-08-11-19h42');
-        chain_id/recipient/amount/token definem o EFEITO onchain e entram na
+        `fn` é um dos métodos de escrita (transfer, contract_call...). Os kwargs
+        são os MESMOS que o fn recebe (chain_id, recipient_address/contract_address,
+        amount/value...). A identidade do EFEITO onchain é extraída deles para a
         Idempotency-Key estável (ver docs 'Choosing a stable key').
         """
         sim = fn(simulate=True, **kwargs)
         ok = sim.get("success", True) and not sim.get("wouldRevert", False)
         if not ok:
             return sim, None
+        chain_id = kwargs.get("chain_id")
+        recipient = kwargs.get("recipient_address") or kwargs.get("contract_address") or ""
+        amount = kwargs.get("amount") or kwargs.get("value") or "0"
+        token = kwargs.get("token_address") or ""
         key = stable_idempotency_key(task_id, chain_id, recipient, amount, token)
         real = fn(simulate=False, idempotency_key=key, **kwargs)
         return sim, real

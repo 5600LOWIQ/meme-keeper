@@ -144,9 +144,7 @@ def build_execution(cfg, kh, task_id, simulate_only):
               f"wouldRevert={res.get('wouldRevert', 'n/a')}")
         return {"mode": "simulate", "response": res}
 
-    token = kwargs.get("token_address") or ""
-    sim, real = kh.preflight_then_execute(
-        fn, task_id, chain, recipient, ex["amount"], token=token, **kwargs)
+    sim, real = kh.preflight_then_execute(fn, task_id, **kwargs)
     if real is None:
         return {"mode": "blocked", "response": sim}
     tx = real.get("transactionHash")
@@ -312,14 +310,12 @@ def main():
         if kh is None:
             print("⚠️  destinatário 0x0 precisa da KH_API_KEY p/ resolver a própria carteira.")
         else:
-            try:
-                w = kh.get_wallet()
-                addr = (w or {}).get("address") or (w or {}).get("walletAddress")
-                if addr:
-                    cfg["wallet"]["recipient"] = addr
-                    print(f"ℹ️  destinatário = carteira do próprio agente: {addr}")
-            except KeeperHubError as e:
-                print(f"⚠️  não resolvi a carteira: {e} — configure wallet.recipient no config.json")
+            addr = kh.get_org_wallet_address()
+            if addr:
+                cfg["wallet"]["recipient"] = addr
+                print(f"ℹ️  destinatário = carteira do próprio agente: {addr}")
+            else:
+                print("⚠️  não resolvi a carteira — configure wallet.recipient no config.json")
 
     if args.once or not (args.watch or args.once):
         run_once(cfg, kh, audit, env, args.simulate, args.confirm)

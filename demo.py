@@ -29,6 +29,8 @@ from keeperhub import KeeperHub
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--auto", action="store_true", help="não pergunta antes de transmitir")
+    ap.add_argument("--force", action="store_true",
+                    help="demo scriptada: executa mesmo sem sinal forte (para o vídeo)")
     args = ap.parse_args()
 
     load_env()
@@ -42,6 +44,17 @@ def main():
         sys.exit(1)
     kh = KeeperHub(api_key)
 
+    # destinatário 0x0 = própria carteira (sweep seguro, sem queimar fundos)
+    recipient = cfg["wallet"].get("recipient", "")
+    if recipient.replace("0x", "").strip("0") == "":
+        addr = kh.get_org_wallet_address()
+        if addr:
+            cfg["wallet"]["recipient"] = addr
+            print(f"ℹ️  destinatário = carteira do próprio agente: {addr}")
+        else:
+            print("❌ Não resolvi a carteira — configure wallet.recipient no config.json")
+            sys.exit(1)
+
     print("=" * 62)
     print("  MEME-KEEPER — agente de memecoin executando onchain via KeeperHub")
     print(f"  {dt.datetime.now().strftime('%d/%m/%Y %H:%M:%S')} · chain {cfg['chain']['name']}")
@@ -54,10 +67,12 @@ def main():
         audit.signal(r["source"], r["score"], r["detail"])
     threshold = cfg["signals"].get("min_score", 2)
     print(f"      score: {total} / limiar {threshold}")
-    if total < threshold:
+    if total < threshold and not args.force:
         print("      (sem sinal forte agora — rode com --force ou ajuste o config)")
         print("      Encerrando demo em modo observação. Nada foi transmitido.")
         return
+    if total < threshold and args.force:
+        print("      (--force: demo scriptada — executa mesmo sem sinal forte, para o vídeo)")
 
     # 2) decisão
     print("\n[2/4] DECISÃO: sinal forte detectado — executar transação real")
